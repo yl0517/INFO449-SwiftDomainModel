@@ -93,11 +93,97 @@ public class Job {
 //// Person
 
 public class Person {
+    var firstName: String
+    var lastName: String
+    var age: Int
     
+    private var _job: Job? = nil
+    public var job: Job? {
+        get {
+            return _job
+        }
+        set {
+            if age >= 16 {
+                _job = newValue
+            } else {
+                _job = nil
+            }
+        }
+    }
+    
+    private var _spouse: Person? = nil
+    public var spouse: Person? {
+        get {
+            return _spouse
+        }
+        set {
+            if age >= 18 {
+                _spouse = newValue
+            } else {
+                _spouse = nil
+            }
+        }
+    }
+    
+    init(firstName: String, lastName: String, age: Int) {
+        self.firstName = firstName
+        self.lastName = lastName
+        self.age = age
+    }
+    
+    func toString() -> String {
+        let jobStr: String
+        if let job = job {
+            switch job.type {
+            case .Hourly(let rate):
+                jobStr = "Hourly(\(Int(rate)))"
+            case .Salary(let annual):
+                jobStr = "Salary(\(annual))"
+            }
+        } else {
+            jobStr = "nil"
+        }
+
+        let spouseStr = spouse?.firstName ?? "nil"
+        
+        return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:\(jobStr) spouse:\(spouseStr)]"
+    }
 }
 
 //////////////////////////////////////
 //// Family
-////
-//public class Family {
-//}
+
+public class Family {
+    var members: [Person] = []
+    
+    init(spouse1: Person, spouse2: Person) {
+        if spouse1.spouse == nil && spouse2.spouse == nil {
+            spouse1.spouse = spouse2
+            spouse2.spouse = spouse1
+        }
+        members.append(spouse1)
+        members.append(spouse2)
+    }
+    
+    func haveChild(_ child: Person) -> Bool {
+        if members.count >= 2 {
+            let spouse1 = members[0]
+            let spouse2 = members[1]
+            if spouse1.age > 21 || spouse2.age > 21 {
+                members.append(child)
+                return true
+            }
+        }
+        return false
+    }
+    
+    func householdIncome() -> Int {
+        return members.reduce(0) { total, person in
+            if let job = person.job {
+                return total + job.calculateIncome(2000)
+            } else {
+                return total
+            }
+        }
+    }
+}
