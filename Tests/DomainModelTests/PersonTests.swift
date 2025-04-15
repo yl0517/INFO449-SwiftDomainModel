@@ -27,11 +27,34 @@ class PersonTests: XCTestCase {
         mike.spouse = Person(firstName: "Bambi", lastName: "Jones", age: 42)
         XCTAssert(mike.spouse != nil)
     }
+    
+    // My Tests
+    func testPersonWithNegativeAge() {
+        let person = Person(firstName: "Test", lastName: "User", age: -5)
+        XCTAssertEqual(person.age, -5)
+    }
+
+    func testUnderageJobAssignment() {
+        let child = Person(firstName: "Kid", lastName: "User", age: 10)
+        child.job = Job(title: "Impossible Job", type: Job.JobType.Hourly(10.0))
+        XCTAssertNil(child.job)
+    }
+
+    func testUnderageSpouseAssignment() {
+        let teen = Person(firstName: "Teen", lastName: "User", age: 17)
+        teen.spouse = Person(firstName: "Partner", lastName: "User", age: 20)
+        XCTAssertNil(teen.spouse)
+    }
 
     static var allTests = [
         ("testPerson", testPerson),
         ("testAgeRestrictions", testAgeRestrictions),
         ("testAdultAgeRestrictions", testAdultAgeRestrictions),
+        
+        // My Tests
+        ("testPersonWithNegativeAge", testPersonWithNegativeAge),
+        ("testUnderageJobAssignment", testUnderageJobAssignment),
+        ("testUnderageSpouseAssignment", testUnderageSpouseAssignment),
     ]
 }
 
@@ -67,9 +90,47 @@ class FamilyTests : XCTestCase {
         let familyIncome = family.householdIncome()
         XCTAssert(familyIncome == 12000)
     }
+    
+    // My Tests
+    func testFamilyCannotHaveChildWhenSpousesUnder21() {
+        let youngSpouse1 = Person(firstName: "Young1", lastName: "Family", age: 20)
+        let youngSpouse2 = Person(firstName: "Young2", lastName: "Family", age: 20)
+        let family = Family(spouse1: youngSpouse1, spouse2: youngSpouse2)
+        let child = Person(firstName: "Child", lastName: "Family", age: 0)
+        let result = family.haveChild(child)
+        XCTAssertFalse(result)
+        XCTAssertFalse(family.members.contains(where: { $0.firstName == "Child" }))
+    }
+    
+    func testFamilyHouseholdIncomeIgnoresMembersWithoutJob() {
+        let spouse1 = Person(firstName: "Adult", lastName: "Family", age: 30)
+        spouse1.job = Job(title: "Working", type: Job.JobType.Salary(2000))
+        let spouse2 = Person(firstName: "Adult2", lastName: "Family", age: 30)
+        let family = Family(spouse1: spouse1, spouse2: spouse2)
+        let child = Person(firstName: "Child", lastName: "Family", age: 5)
+        _ = family.haveChild(child)
+        let income = family.householdIncome()
+        XCTAssertEqual(income, 2000)
+    }
+    
+    func testFamilyCanHaveChildWithAnAdultSpouse() {
+        let spouse1 = Person(firstName: "Adult", lastName: "Family", age: 25)
+        let spouse2 = Person(firstName: "Adult2", lastName: "Family", age: 25)
+        let family = Family(spouse1: spouse1, spouse2: spouse2)
+        let child = Person(firstName: "Child", lastName: "Family", age: 0)
+        let result = family.haveChild(child)
+        XCTAssertTrue(result)
+        XCTAssertTrue(family.members.contains(where: { $0.firstName == "Child" }))
+    }
   
     static var allTests = [
         ("testFamily", testFamily),
         ("testFamilyWithKids", testFamilyWithKids),
+        
+        // My Tests
+        ("testFamilyCannotHaveChildWhenSpousesUnder21", testFamilyCannotHaveChildWhenSpousesUnder21),
+        ("testFamilyHouseholdIncomeIgnoresMembersWithoutJob", testFamilyHouseholdIncomeIgnoresMembersWithoutJob),
+        ("testFamilyCanHaveChildWithAnAdultSpouse", testFamilyCanHaveChildWithAnAdultSpouse),
+        
     ]
 }

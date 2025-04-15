@@ -70,21 +70,25 @@ public class Job {
     }
     
     func raise(byAmount amount: Double) {
-        switch self.type {
-        case .Hourly(let rate):
-            self.type = .Hourly(rate + amount)
-        case .Salary(let annual):
-            self.type = .Salary(annual + UInt(amount))
+        if amount > 0 {
+            switch self.type {
+            case .Hourly(let rate):
+                self.type = .Hourly(rate + amount)
+            case .Salary(let annual):
+                self.type = .Salary(annual + UInt(amount))
+            }
         }
     }
     
     func raise(byPercent percentage: Double) {
-        switch self.type {
-        case .Hourly(let rate):
-            self.type = .Hourly(rate * (1 + percentage))
-        case .Salary(let annual):
-            let updated = Double(annual) * (1 + percentage)
-            self.type = .Salary(UInt(updated.rounded()))
+        if percentage > 0 {
+            switch self.type {
+            case .Hourly(let rate):
+                self.type = .Hourly(rate * (1 + percentage))
+            case .Salary(let annual):
+                let updated = Double(annual) * (1 + percentage)
+                self.type = .Salary(UInt(updated.rounded()))
+            }
         }
     }
 }
